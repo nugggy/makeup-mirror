@@ -14,7 +14,7 @@ class UpdateControllerTest {
 
     @Test
     fun automaticCheckWithNoUpdateStaysIdle() = runTest {
-        val c = UpdateController(this, check = { null }, download = { _, _ -> apk }, canInstall = { true })
+        val c = UpdateController(this, check = { CheckResult.UpToDate }, download = { _, _ -> apk }, canInstall = { true })
         c.checkNow()
         advanceUntilIdle()
         assertEquals(UpdateState.Idle, c.state.value)
@@ -22,7 +22,7 @@ class UpdateControllerTest {
 
     @Test
     fun manualCheckWithNoUpdateReportsUpToDate() = runTest {
-        val c = UpdateController(this, check = { null }, download = { _, _ -> apk }, canInstall = { true })
+        val c = UpdateController(this, check = { CheckResult.UpToDate }, download = { _, _ -> apk }, canInstall = { true })
         c.checkNow(manual = true)
         advanceUntilIdle()
         assertEquals(UpdateState.UpToDate, c.state.value)
@@ -31,7 +31,7 @@ class UpdateControllerTest {
     @Test
     fun foundUpdateDownloadsAndIsReadyToInstall() = runTest {
         val progress = mutableListOf<Float>()
-        val c = UpdateController(this, check = { info }, download = { _, report -> report(0.5f); progress += 0.5f; apk }, canInstall = { true })
+        val c = UpdateController(this, check = { CheckResult.Available(info) }, download = { _, report -> report(0.5f); progress += 0.5f; apk }, canInstall = { true })
         c.checkNow()
         advanceUntilIdle()
         assertEquals(UpdateState.Available(info), c.state.value)
@@ -44,7 +44,7 @@ class UpdateControllerTest {
     @Test
     fun blockedInstallAsksForPermissionThenRecovers() = runTest {
         var allowed = false
-        val c = UpdateController(this, check = { info }, download = { _, _ -> apk }, canInstall = { allowed })
+        val c = UpdateController(this, check = { CheckResult.Available(info) }, download = { _, _ -> apk }, canInstall = { allowed })
         c.checkNow()
         advanceUntilIdle()
         c.startDownload()
@@ -62,7 +62,7 @@ class UpdateControllerTest {
         var attempts = 0
         val c = UpdateController(
             this,
-            check = { info },
+            check = { CheckResult.Available(info) },
             download = { _, _ -> attempts++; if (attempts == 1) throw IOException("No connection") else apk },
             canInstall = { true },
         )
@@ -78,10 +78,26 @@ class UpdateControllerTest {
 
     @Test
     fun dismissReturnsToIdle() = runTest {
-        val c = UpdateController(this, check = { info }, download = { _, _ -> apk }, canInstall = { true })
+        val c = UpdateController(this, check = { CheckResult.Available(info) }, download = { _, _ -> apk }, canInstall = { true })
         c.checkNow()
         advanceUntilIdle()
         c.dismiss()
+        assertEquals(UpdateState.Idle, c.state.value)
+    }
+
+    @Test
+    fun manualCheckThatFailsSaysSo() = runTest {
+        val c = UpdateController(this, check = { CheckResult.Failed }, download = { _, _ -> apk }, canInstall = { true })
+        c.checkNow(manual = true)
+        advanceUntilIdle()
+        assertEquals(UpdateState.CheckFailed, c.state.value)
+    }
+
+    @Test
+    fun automaticCheckThatFailsStaysSilent() = runTest {
+        val c = UpdateController(this, check = { CheckResult.Failed }, download = { _, _ -> apk }, canInstall = { true })
+        c.checkNow()
+        advanceUntilIdle()
         assertEquals(UpdateState.Idle, c.state.value)
     }
 }

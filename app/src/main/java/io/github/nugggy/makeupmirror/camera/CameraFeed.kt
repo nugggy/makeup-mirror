@@ -20,15 +20,20 @@ class CameraFeed(private val context: Context) {
     private var analysis: ImageAnalysis? = null
     private var provider: ProcessCameraProvider? = null
 
+    /** Bumped by every start and stop, so a provider callback that arrives after stop() does not bind. */
+    private var session = 0
+
     fun start(
         owner: LifecycleOwner,
         lensFacing: Int,
         onFrame: (Bitmap, Long) -> Unit,
         onError: (Throwable) -> Unit,
     ) {
+        val mySession = ++session
         val worker = Executors.newSingleThreadExecutor().also { executor = it }
         val future = ProcessCameraProvider.getInstance(context)
         future.addListener({
+            if (mySession != session) return@addListener
             try {
                 val cameraProvider = future.get().also { provider = it }
                 val useCase = ImageAnalysis.Builder()
@@ -64,6 +69,7 @@ class CameraFeed(private val context: Context) {
     }
 
     fun stop() {
+        session++
         analysis?.let { useCase ->
             useCase.clearAnalyzer()
             provider?.unbind(useCase)

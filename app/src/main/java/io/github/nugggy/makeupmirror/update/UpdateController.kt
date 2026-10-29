@@ -11,6 +11,7 @@ sealed interface UpdateState {
     data object Idle : UpdateState
     data object Checking : UpdateState
     data object UpToDate : UpdateState
+    data object CheckFailed : UpdateState
     data class Available(val info: UpdateInfo) : UpdateState
     data class Downloading(val info: UpdateInfo, val progress: Float) : UpdateState
     data class NeedsPermission(val info: UpdateInfo, val apk: File) : UpdateState
@@ -21,7 +22,7 @@ sealed interface UpdateState {
 /** Drives the update flow. Android specifics are injected so the flow can be unit tested. */
 class UpdateController(
     private val scope: CoroutineScope,
-    private val check: suspend () -> UpdateInfo?,
+    private val check: suspend () -> CheckResult,
     private val download: suspend (UpdateInfo, (Float) -> Unit) -> File,
     private val canInstall: () -> Boolean,
 ) {
@@ -33,11 +34,10 @@ class UpdateController(
         if (current is UpdateState.Checking || current is UpdateState.Downloading) return
         _state.value = UpdateState.Checking
         scope.launch {
-            val info = check()
-            _state.value = when {
-                info != null -> UpdateState.Available(info)
-                manual -> UpdateState.UpToDate
-                else -> UpdateState.Idle
+            _state.value = when (val result = check()) {
+                is CheckResult.Available -> UpdateState.Available(result.info)
+                CheckResult.UpToDate -> if (manual) UpdateState.UpToDate else UpdateState.Idle
+                CheckResult.Failed -> if (manual) UpdateState.CheckFailed else UpdateState.Idle
             }
         }
     }

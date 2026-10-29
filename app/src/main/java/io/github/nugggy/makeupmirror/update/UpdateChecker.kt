@@ -11,6 +11,13 @@ import okhttp3.Request
 
 data class UpdateInfo(val version: Version, val apkUrl: String, val notes: String)
 
+/** Outcome of asking GitHub for the latest release. */
+sealed interface CheckResult {
+    data class Available(val info: UpdateInfo) : CheckResult
+    data object UpToDate : CheckResult
+    data object Failed : CheckResult
+}
+
 @Serializable
 private data class ReleaseDto(
     @SerialName("tag_name") val tagName: String,
@@ -32,7 +39,7 @@ class UpdateChecker(
     private val currentVersion: String,
     private val latestUrl: String = LATEST_URL,
 ) {
-    suspend fun check(): UpdateInfo? = withContext(Dispatchers.IO) {
+    suspend fun check(): CheckResult = withContext(Dispatchers.IO) {
         try {
             val request = Request.Builder()
                 .url(latestUrl)
@@ -40,11 +47,14 @@ class UpdateChecker(
                 .build()
             client.newCall(request).execute().use { response ->
                 val body = response.body?.string()
-                if (!response.isSuccessful || body == null) null else parseRelease(body, currentVersion)
+                when {
+                    !response.isSuccessful || body == null -> CheckResult.Failed
+                    else -> parseRelease(body, currentVersion)?.let { CheckResult.Available(it) } ?: CheckResult.UpToDate
+                }
             }
         } catch (e: Exception) {
             Log.w(TAG, "Update check failed", e)
-            null
+            CheckResult.Failed
         }
     }
 

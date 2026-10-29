@@ -53,7 +53,7 @@ class UpdateCheckerTest {
         server.enqueue(MockResponse().setResponseCode(403).setBody("""{"message":"rate limited"}"""))
         server.start()
         val checker = UpdateChecker(OkHttpClient(), "0.1.0", server.url("/latest").toString())
-        assertNull(checker.check())
+        assertEquals(CheckResult.Failed, checker.check())
         server.shutdown()
     }
 
@@ -63,13 +63,25 @@ class UpdateCheckerTest {
         server.enqueue(MockResponse().setBody(release("v1.0.0")))
         server.start()
         val checker = UpdateChecker(OkHttpClient(), "0.1.0", server.url("/latest").toString())
-        assertEquals(Version(1, 0, 0), checker.check()?.version)
+        assertEquals(Version(1, 0, 0), (checker.check() as CheckResult.Available).info.version)
         server.shutdown()
     }
 
     @Test
     fun unreachableServerReturnsNull() = runTest {
         val checker = UpdateChecker(OkHttpClient(), "0.1.0", "http://127.0.0.1:1/latest")
-        assertNull(checker.check())
+        assertEquals(CheckResult.Failed, checker.check())
+    }
+}
+
+class UpdateCheckerUpToDateTest {
+    @Test
+    fun sameVersionIsUpToDate() = kotlinx.coroutines.test.runTest {
+        val server = okhttp3.mockwebserver.MockWebServer()
+        server.enqueue(okhttp3.mockwebserver.MockResponse().setBody("""{"tag_name":"v0.1.0","assets":[{"name":"a.apk","browser_download_url":"https://example.com/a.apk"}]}"""))
+        server.start()
+        val checker = UpdateChecker(okhttp3.OkHttpClient(), "0.1.0", server.url("/latest").toString())
+        org.junit.Assert.assertEquals(CheckResult.UpToDate, checker.check())
+        server.shutdown()
     }
 }

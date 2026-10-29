@@ -58,6 +58,12 @@ fun UpdateDialog(
             text = { Text("You have the latest version of Makeup Mirror.") },
             confirmButton = { TextButton(onClick = onDismiss) { Text("OK") } },
         )
+        UpdateState.CheckFailed -> AlertDialog(
+            onDismissRequest = onDismiss,
+            title = { Text("Couldn't check for updates") },
+            text = { Text("Check your internet connection and try again later.") },
+            confirmButton = { TextButton(onClick = onDismiss) { Text("OK") } },
+        )
         UpdateState.Idle, UpdateState.Checking -> Unit
     }
 }
