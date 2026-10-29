@@ -21,8 +21,11 @@ android {
         applicationId = "io.github.nugggy.makeupmirror"
         minSdk = 26
         targetSdk = 35
+        testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         versionName = appVersion
         versionCode = versionParts[0] * 10000 + versionParts[1] * 100 + versionParts[2]
+        // MediaPipe ships only an arm64 native library, so build for 64-bit ARM phones only.
+        ndk { abiFilters += "arm64-v8a" }
     }
 
     signingConfigs {
@@ -93,4 +96,6 @@ dependencies {
     testImplementation(libs.junit)
     testImplementation(libs.kotlinx.coroutines.test)
     testImplementation(libs.okhttp.mockwebserver)
+    androidTestImplementation(libs.androidx.test.ext.junit)
+    androidTestImplementation(libs.androidx.test.runner)
 }

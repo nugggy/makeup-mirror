@@ -1,5 +1,6 @@
 package io.github.nugggy.makeupmirror.camera
 
+import android.util.Log
 import androidx.camera.core.CameraSelector
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
@@ -26,7 +27,10 @@ fun rememberFaceCamera(attempt: Int): FaceCameraState {
 
     DisposableEffect(owner, tracker) {
         if (tracker != null) {
-            feed.start(owner, CameraSelector.LENS_FACING_FRONT, tracker::process) { cameraError = it.message ?: "The camera isn't available" }
+            feed.start(owner, CameraSelector.LENS_FACING_FRONT, tracker::process) {
+                Log.w("FaceCamera", "Front camera failed", it)
+                cameraError = "Couldn't open the front camera. Close any other app using the camera, then try again."
+            }
         }
         onDispose {
             feed.stop()

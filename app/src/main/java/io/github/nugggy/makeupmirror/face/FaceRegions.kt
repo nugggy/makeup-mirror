@@ -50,7 +50,7 @@ object FaceRegions {
         Region.HIGHLIGHT -> listOf(
             RegionShape.Blob(117, 34, radius = 0.045f, stretch = 2f),
             RegionShape.Blob(346, 264, radius = 0.045f, stretch = 2f),
-            RegionShape.Stroke(listOf(168, 6, 197, 195), width = 0.018f),
+            RegionShape.Stroke(listOf(6, 197, 195), width = 0.014f),
         )
         Region.LIDS -> listOf(
             RegionShape.Polygon(RIGHT_UPPER_LID + RIGHT_CREASE.reversed()),

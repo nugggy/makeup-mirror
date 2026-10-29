@@ -42,6 +42,11 @@ class RenderPlannerTest {
     }
 
     @Test
+    fun highlightStrokeHasSoftEdges() {
+        assertTrue(RenderPlanner.softnessFor(Region.HIGHLIGHT) > 0f)
+    }
+
+    @Test
     fun strengthScalesOpacityWithinBounds() {
         assertEquals(0.3f, RenderPlanner.plan(match, strength = 0.5f).layers.last().opacity, 1e-4f)
         assertEquals(1f, RenderPlanner.plan(match, strength = 3f).layers.last().opacity, 1e-4f)

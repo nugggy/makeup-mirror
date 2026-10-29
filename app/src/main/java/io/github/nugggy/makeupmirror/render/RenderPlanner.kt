@@ -41,7 +41,8 @@ object RenderPlanner {
     internal fun softnessFor(region: Region): Float = when (region) {
         Region.FACE -> 0.04f
         Region.UNDER_EYE -> 0.025f
-        Region.CONTOUR, Region.BRONZE, Region.CHEEKS, Region.HIGHLIGHT -> 0f // drawn as soft gradients already
+        Region.CONTOUR, Region.BRONZE, Region.CHEEKS -> 0f // drawn as soft gradients already
+        Region.HIGHLIGHT -> 0.012f // blurs the nose stroke; cheek blobs are gradients
         Region.LIDS -> 0.012f
         Region.CREASE -> 0.02f
         Region.LOWER_LASH_LINE -> 0.006f

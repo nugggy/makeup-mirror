@@ -39,7 +39,7 @@ class MakeupRenderer {
                 Blend.TINT -> {
                     drawShapes(canvas, shapes, layer.colour, layer.opacity, Mode.COLOUR, blur)
                     if (ColourMath.toLab(layer.colour).l < 55) {
-                        drawShapes(canvas, shapes, layer.colour, layer.opacity * 0.5f, Mode.MULTIPLY, blur)
+                        drawShapes(canvas, shapes, layer.colour, layer.opacity * 0.8f, Mode.MULTIPLY, blur)
                     }
                 }
             }
