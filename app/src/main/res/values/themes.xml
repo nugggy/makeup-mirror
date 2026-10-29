@@ -1,0 +1,3 @@
+<resources>
+    <style name="Theme.MakeupMirror" parent="android:Theme.Material.Light.NoActionBar" />
+</resources>
