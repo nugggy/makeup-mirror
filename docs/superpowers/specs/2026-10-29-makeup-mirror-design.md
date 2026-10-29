@@ -45,7 +45,7 @@ Each component lives in its own package with a narrow interface.
 
 ### release pipeline
 
-- `.github/workflows/release.yml` triggers on `v*` tags. It builds `assembleRelease`, signs with a keystore held in repository secrets (`KEYSTORE_BASE64`, `KEYSTORE_PASSWORD`, `KEY_ALIAS`, `KEY_PASSWORD`), and creates a GitHub Release with `makeup-mirror-<version>.apk` attached.
+- `.github/workflows/release.yml` triggers on `v*` tags. It builds `assembleRelease`, signs with a keystore held in repository secrets (`KEYSTORE_BASE64`, `KEYSTORE_PASSWORD`, `KEY_ALIAS`, `KEY_PASSWORD`), and creates a GitHub Release with `makeup-mirror-<version>.apk` attached, plus an identical copy named `makeup-mirror.apk` so the link `https://github.com/nugggy/makeup-mirror/releases/latest/download/makeup-mirror.apk` always points to the newest build.
 - `versionName` comes from the tag. `versionCode` = MAJOR*10000 + MINOR*100 + PATCH.
 - The keystore is generated once locally and never committed. The owner keeps a backup, because losing it means future updates cannot install over the existing app.
 - `.github/workflows/ci.yml` runs unit tests and a debug build on pushes and pull requests.
@@ -110,7 +110,7 @@ Each component lives in its own package with a narrow interface.
 3. **My Kit** shows a product grid with a + button. Adding a product goes type picker, swatch sampler, name and finish, save. Long press edits or deletes.
 4. **Try On** shows the live mirror with an overlay and a carousel of matched looks (badge plus reasons). It has a before/after toggle, a "show looks I can't do yet" toggle that lists the missing products, and a Choose button that opens the lesson.
 5. **Lesson** is as described above.
-6. **Settings** has read-aloud, overlay strength, re-analyse face, check for updates, version and image sources.
+6. **Settings** has read-aloud, overlay strength, re-analyse face, check for updates, a **Share app** button, version and image sources. Share app opens the Android share sheet with the latest-APK link above.
 
 Bottom navigation: Try On, My Kit, Settings.
 
@@ -143,7 +143,7 @@ Look reference and step images are collected with Claude in Chrome from the web,
 
 ## Out of scope
 
-- Accounts, cloud sync, sharing and social features.
+- Accounts, cloud sync and social features (the only sharing is the Share app link).
 - Before-and-after automated feedback on application quality.
 - iOS.
 - Play Store distribution.
