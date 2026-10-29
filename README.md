@@ -24,4 +24,4 @@ Requires JDK 17 and the Android SDK. Run ./gradlew testDebugUnitTest assembleDeb
 
 ## Credits
 
-Face tracking uses Google MediaPipe Face Landmarker. Look reference image sources are listed in SOURCES.md.
+Face tracking uses the Google MediaPipe Face Landmarker model (app/src/main/assets/face_landmarker.task), licensed under the Apache License 2.0. Look reference image sources are listed in SOURCES.md.
